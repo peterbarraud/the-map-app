@@ -1,0 +1,6 @@
+body {
+    background-color: rgb(256, 256, 256) !important;
+}
+form {
+    --form-back-color:rgb(256, 256, 256);
+}

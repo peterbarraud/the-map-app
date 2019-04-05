@@ -1,0 +1,50 @@
+{
+  "name": "rapid-browserify-budo-browserifycss",
+  "version": "1.0.0",
+  "description": "A rapid prototyping project for ReactJS and Browerify+Budo using Browserify-CSS to manage CSS",
+  "main": "entry.js",
+  "scripts": {
+    "start": "budo index.js --live --open --port 9876 -- -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] --plugins [ @babel/plugin-proposal-class-properties ] ] -g browserify-css",
+    "build": "node scripts/build && html-dist --config ./scripts/html-dist.config.js --input index.html",
+    "testbuild": "budo -d ./build --open --port 9875"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peterbarraud/react-browserify-budo-browserifycss.git"
+  },
+  "keywords": [
+    "rapid prototyping",
+    "reactjs",
+    "mini.css",
+    "browserify",
+    "browserify-css",
+    "budo",
+    "uglifyify",
+    "html-minifier"
+  ],
+  "author": "@gapeterb",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/peterbarraud/react-browserify-budo-browserifycss/issues"
+  },
+  "homepage": "https://github.com/peterbarraud/react-browserify-budo-browserifycss#readme",
+  "devDependencies": {
+    "@babel/core": "^7.3.4",
+    "@babel/plugin-proposal-class-properties": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
+    "@babel/preset-react": "^7.0.0",
+    "babelify": "^10.0.0",
+    "browserify-css": "^0.14.0",
+    "budo": "^11.6.1",
+    "html-dist": "^1.0.1",
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.6.3",
+    "uglifyify": "^5.0.1"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "mini.css": "^3.0.1",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4"
+  }
+}

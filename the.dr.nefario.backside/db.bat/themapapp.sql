@@ -27,7 +27,7 @@ CREATE TABLE `area` (
   `areaname` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `areaname` (`areaname`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -36,6 +36,7 @@ CREATE TABLE `area` (
 
 LOCK TABLES `area` WRITE;
 /*!40000 ALTER TABLE `area` DISABLE KEYS */;
+INSERT INTO `area` VALUES (3,'sector 123'),(6,'sector 128'),(5,'sector 129'),(1,'sector 132'),(2,'sector 148'),(4,'sector 178');
 /*!40000 ALTER TABLE `area` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -48,9 +49,9 @@ DROP TABLE IF EXISTS `category`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `category` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `catname` varchar(50) NOT NULL,
+  `name` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `catname` (`catname`)
+  UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -60,7 +61,7 @@ CREATE TABLE `category` (
 
 LOCK TABLES `category` WRITE;
 /*!40000 ALTER TABLE `category` DISABLE KEYS */;
-INSERT INTO `category` VALUES (9,'beauty palour'),(5,'bike repair'),(12,'book seller'),(11,'dhaba'),(10,'drug store'),(13,'grocer'),(17,'gym'),(8,'pharmacy'),(16,'play school'),(4,'resturant'),(7,'salon'),(15,'school'),(1,'toy store'),(6,'tyre puncture'),(14,'vegitable vendor');
+INSERT INTO `category` VALUES (1,'beauty palour'),(2,'bike repair'),(3,'book seller'),(4,'dhaba'),(5,'drug store'),(6,'grocer'),(7,'gym'),(8,'pharmacy'),(9,'play school'),(10,'restaurant'),(11,'salon'),(12,'school'),(13,'toy store'),(14,'tyre puncture'),(15,'vegetable vendor');
 /*!40000 ALTER TABLE `category` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -101,8 +102,8 @@ DROP TABLE IF EXISTS `establishment`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `establishment` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `estname` varchar(50) NOT NULL,
-  `estaddress` varchar(50) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `address` varchar(50) NOT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `areaid` smallint(5) unsigned NOT NULL,
   PRIMARY KEY (`id`)
@@ -127,4 +128,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-04-05 13:30:35
+-- Dump completed on 2019-04-06  8:35:41

@@ -1,15 +1,15 @@
-1,'beauty palour'
-2,'bike repair'
-3,'book seller'
-4,'dhaba'
-5,'drug store'
-6,'grocer'
-7,'gym'
-8,'pharmacy'
-9,'play school'
-10,'restaurant'
-11,'salon'
-12,'school'
-13,'toy store'
-14,'tyre puncture'
-15,'vegetable vendor'
+1,beauty palour
+2,bike repair
+3,book seller
+4,dhaba
+5,drug store
+6,grocer
+7,gym
+8,pharmacy
+9,play school
+10,restaurant
+11,salon
+12,school
+13,toy store
+14,tyre puncture
+15,vegetable vendor

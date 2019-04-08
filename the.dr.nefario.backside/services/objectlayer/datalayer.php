@@ -56,7 +56,12 @@ final class DataLayer {
     if ($filter != null){
       $sql_statement .= ' where';
       foreach ($filter as $fieldname => $fieldvalue){
-        $sql_statement .= " $fieldname = '$fieldvalue' and";
+        // checking for the like clause
+        if (strpos($fieldvalue, '%')){
+          $sql_statement .= " $fieldname like '$fieldvalue' and";
+        } else {
+          $sql_statement .= " $fieldname = '$fieldvalue' and";
+        }
       }
     }
     $sql_statement = rtrim($sql_statement,'and');
@@ -68,6 +73,27 @@ final class DataLayer {
       array_push($retval, $row['id']);
     }
     return $retval;
+  }
+  /* select e.id, e.name as ename, e.address, e.phone from
+      establishment e, category c, est_cat ec
+      where e.id = ec.estid and c.id = ec.catid and e.areaid = 3 and e.id != 1
+      and c.id in (select c.id as cid from establishment e, category c, est_cat ec
+                      where e.id = ec.estid and c.id = ec.catid and e.areaid = 3
+                      and e.name like 'ABAN%'); */
+  public function GetRelatedEstablishmentObjectIDs($eid, $areaid){
+    $retval = array();
+    $sql_statement = "select e.id from
+                        establishment e, category c, est_cat ec
+                        where e.id = ec.estid and c.id = ec.catid and e.areaid = $areaid and e.id != $eid
+                        and c.id in (select c.id as cid from establishment e, category c, est_cat ec
+                                      where e.id = ec.estid and c.id = ec.catid and e.areaid = $areaid
+                                      and e.id = '$eid');";
+    $result = $this->conn->query($sql_statement);
+    while($row = $result->fetch_assoc()) {
+      array_push($retval, $row['id']);
+    }
+    return $retval;
+                                  
   }
 
   public function Save($object){

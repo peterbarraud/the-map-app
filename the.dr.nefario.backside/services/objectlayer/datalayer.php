@@ -64,10 +64,15 @@ final class DataLayer {
         }
       }
     }
-    $sql_statement = rtrim($sql_statement,'and');
+    // strip out last "and" but only if it exists
+    if (substr($sql_statement, strlen($sql_statement), 3) == 'and'){
+      $sql_statement = substr($sql_statement,0, strlen($sql_statement)-4);
+    }
+
     if ($sortby !== null) {
       $sql_statement .= " order by $sortby $sortdirection";
     }
+
     $result = $this->conn->query($sql_statement);
     while($row = $result->fetch_assoc()) {
       array_push($retval, $row['id']);

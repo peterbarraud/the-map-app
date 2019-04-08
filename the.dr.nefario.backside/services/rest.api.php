@@ -5,6 +5,11 @@
   $restapp->run();
 
 
+  function getallareas(){
+    require_once('objectlayer/areacollection.php');
+    $establishments = new areacollection();
+    echo json_encode($establishments);
+  }
   function getestabsearchresult($name, $areaid) {
     require_once('objectlayer/establishmentcollection.php');
     $establishments = new establishmentcollection(array("name" => "$name", "areaid" => $areaid));

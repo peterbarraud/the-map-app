@@ -95,7 +95,6 @@ final class DataLayer {
                         and c.id in (select c.id as cid from establishment e, category c, est_cat ec
                                       where e.id = ec.estid and c.id = ec.catid and e.areaid = $areaid
                                       and e.id = '$eid');";
-    file_put_contents(__FUNCTION__ . ".log", $sql_statement);
     $result = $this->conn->query($sql_statement);
     while($row = $result->fetch_assoc()) {
       array_push($retval, $row['id']);

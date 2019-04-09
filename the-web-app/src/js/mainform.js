@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
-import {ResultList} from './resultlist';
+import {PrimaryResultList} from './primaryresultlist';
+import {OtherResultList} from './otherresultlist';
 import {NoResults} from './noresults'
 import {GetStarted} from './getstarted'
 import axios from "axios";
@@ -9,7 +10,7 @@ import Select from 'react-select';
 export class MainForm extends Component {
     state = {
         search : '',
-        result : [],
+        searchresults : {},
         juststarted : true,
         options: [],
         selectedOption: null,
@@ -29,27 +30,37 @@ export class MainForm extends Component {
     }
     handleChange = (selectedOption) => {
         this.setState({ selectedOption });
-        console.log(`Option selected:`, selectedOption);
       }    
 
     searchfor = () => {
         this.state.juststarted = false;
         if (this.state.selectedOption === null){
-            console.log('no area selected');
         } else {
             if (this.state.search !== ''){
-                console.log(this.state.restbaseurl +  "getestabsearchresult/" + this.state.search + "%/" + this.state.selectedOption.value);
                 axios
                     .get(this.state.restbaseurl +  "getestabsearchresult/" + this.state.search + "%/" + this.state.selectedOption.value)
                     .then(response => {
-                        this.setState({result: response.data.items});
+                        this.setState({searchresults: response.data});
+                        // this.setState({searchresults: response.data.searchresults.establishments});
+                        // this.setState({relatedestabs: response.data.searchresults.relatedestablishments});
                     });
             }
         }
     }
-    checkresults = () => {
-        if (this.state.result){
-            if (this.state.result.length === 0){
+    checkotherresults = () => {
+        if (this.state.searchresults.relatedestablishments){
+            if (this.state.searchresults.relatedestablishments.length === 0){
+                return false;
+            } else{
+                return true
+            }
+        } else{
+            return false;
+        }
+    }
+    checkprimaryresults = () => {
+        if (this.state.searchresults.establishments){
+            if (this.state.searchresults.establishments.length === 0){
                 return false;
             } else{
                 return true
@@ -95,8 +106,11 @@ export class MainForm extends Component {
                         this.state.juststarted === true ? <GetStarted /> : null
                     }
                     {
-                        this.checkresults() ? <ResultList results={this.state.result}/> : <NoResults />
-                    }                        
+                        this.checkprimaryresults() ? <PrimaryResultList primaryestabs={this.state.searchresults.establishments}/> : <NoResults />
+                    }                   
+                    {
+                        this.checkotherresults() ? <OtherResultList relatedestabs={this.state.searchresults.relatedestablishments}/> : <NoResults />
+                    }                   
                 </div>
             )    
         }

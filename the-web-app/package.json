@@ -45,6 +45,7 @@
     "axios": "^0.18.0",
     "mini.css": "^3.0.1",
     "react": "^16.8.4",
-    "react-dom": "^16.8.4"
+    "react-dom": "^16.8.4",
+    "react-select": "^2.4.2"
   }
 }

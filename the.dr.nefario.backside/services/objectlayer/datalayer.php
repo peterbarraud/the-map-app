@@ -64,9 +64,11 @@ final class DataLayer {
         }
       }
     }
+
     // strip out last "and" but only if it exists
-    if (substr($sql_statement, strlen($sql_statement), 3) == 'and'){
-      $sql_statement = substr($sql_statement,0, strlen($sql_statement)-4);
+    if (substr($sql_statement, strlen($sql_statement) - 3, 3) === 'and'){
+      $sql_statement = substr($sql_statement, 0, strlen($sql_statement) - 4);
+   
     }
 
     if ($sortby !== null) {
@@ -93,6 +95,7 @@ final class DataLayer {
                         and c.id in (select c.id as cid from establishment e, category c, est_cat ec
                                       where e.id = ec.estid and c.id = ec.catid and e.areaid = $areaid
                                       and e.id = '$eid');";
+    file_put_contents(__FUNCTION__ . ".log", $sql_statement);
     $result = $this->conn->query($sql_statement);
     while($row = $result->fetch_assoc()) {
       array_push($retval, $row['id']);

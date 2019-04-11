@@ -18,8 +18,12 @@
     // TODO
     // Next line is presumptous. What if the search for name like returned multiple estabs
     // need to hande passing mutiple eids => GetRelatedEstablishments
-    $establishment = $establishments->items[0];
-    $relatedestablishments = establishmentcollection::GetRelatedEstablishments($establishment->id, $areaid);
+    // $establishment = $establishments->items[0];
+    $eids = array();
+    foreach($establishments->items as $establishment){
+      array_push($eids, $establishment->id);
+    }
+    $relatedestablishments = establishmentcollection::GetRelatedEstablishments($eids, $areaid);
     echo json_encode(array('establishments' => $establishments, 'relatedestablishments' => $relatedestablishments));
   }
 

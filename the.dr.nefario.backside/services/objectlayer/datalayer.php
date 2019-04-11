@@ -55,20 +55,19 @@ final class DataLayer {
     $sql_statement = "select id from $classname";
     if ($filter != null){
       $sql_statement .= ' where';
+      // create an array of all the and'ed statements if there are multiple fields in the filter
+      $ands = array();
       foreach ($filter as $fieldname => $fieldvalue){
         // checking for the like clause
         if (strpos($fieldvalue, '%')){
-          $sql_statement .= " $fieldname like '$fieldvalue' and";
+          array_push($ands, " lower($fieldname) like lower('$fieldvalue')");
         } else {
-          $sql_statement .= " $fieldname = '$fieldvalue' and";
+          array_push($ands, " lower($fieldname) = lower('$fieldvalue')");
         }
       }
-    }
-
-    // strip out last "and" but only if it exists
-    if (substr($sql_statement, strlen($sql_statement) - 3, 3) === 'and'){
-      $sql_statement = substr($sql_statement, 0, strlen($sql_statement) - 4);
-   
+      if (sizeof($ands) > 0){
+        $sql_statement .= implode(' and ', $ands);
+      }
     }
 
     if ($sortby !== null) {
@@ -87,14 +86,15 @@ final class DataLayer {
       and c.id in (select c.id as cid from establishment e, category c, est_cat ec
                       where e.id = ec.estid and c.id = ec.catid and e.areaid = 3
                       and e.name like 'ABAN%'); */
-  public function GetRelatedEstablishmentObjectIDs($eid, $areaid){
+  public function GetRelatedEstablishmentObjectIDs($eids, $areaid){
     $retval = array();
+    $eid_comma_list = implode(',', $eids);
     $sql_statement = "select e.id from
                         establishment e, category c, est_cat ec
-                        where e.id = ec.estid and c.id = ec.catid and e.areaid = $areaid and e.id != $eid
+                        where e.id = ec.estid and c.id = ec.catid and e.areaid = $areaid and e.id not in ($eid_comma_list)
                         and c.id in (select c.id as cid from establishment e, category c, est_cat ec
                                       where e.id = ec.estid and c.id = ec.catid and e.areaid = $areaid
-                                      and e.id = '$eid');";
+                                      and e.id in ($eid_comma_list));";
     $result = $this->conn->query($sql_statement);
     while($row = $result->fetch_assoc()) {
       array_push($retval, $row['id']);

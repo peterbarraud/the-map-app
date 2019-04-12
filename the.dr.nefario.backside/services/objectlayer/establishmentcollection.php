@@ -53,16 +53,24 @@ class establishmentcollection extends objectcollectionbase {
         //              "bike repair" is better than "motor bike repair"
         
         // 1. split the search_q into words
-        self::log_search_results($search_q);
+        self::log_search_results("Search query: " . $search_q);
         $words = preg_split ("/\s+/", $search_q);
         // $top_of_words_array = ;
         foreach (range(0, sizeof($words)-1) as $i){
             foreach(range(1, sizeof($words) - $i) as $j){
                 // self::log_search_results("$i, $j");
                 $slice = array_slice($words, $i, $j);
-                self::log_search_results(implode(' ', $slice));
+                $sub_str = implode(' ', $slice);
+                self::log_search_results("search sub-str: " . $sub_str);
+                $matches = preg_grep("/($sub_str)/i", array_keys($cats));
+                self::log_search_results("Results:");
+                foreach($matches as $match){
+                    self::log_search_results($match);
+                }
+                self::log_search_results("=====");
+                // self::log_search_results();
             }
-            self::log_search_results("=============");
+            // self::log_search_results("=============");
         }
         
 

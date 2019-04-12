@@ -25,16 +25,21 @@ final class DataLayer {
     $this->conn->Close();
   }
 
-  //get all the fields for an object
-  public function GetObjectData($object){
-    if (!isset($object->id)){
-      $object->id = 'null';
-    }
-    $sql_statement = 'select * from ' . get_class($object) . ' where id = ' . $object->id;
-    $result = $this->conn->query($sql_statement);
-    $row = $result->fetch_assoc();
-    while ($fieldinfo = $result->fetch_field()) {
-      $object->{$fieldinfo->name} = $row[$fieldinfo->name];
+  //get all the fields for an empty data object (useful for create)
+  // set all the fields for an existing object
+  public function GetObjectData($object, $data){
+    if ($data === null){
+      $sql_statement = 'select * from ' . get_class($object) . ' where id = null';
+      $result = $this->conn->query($sql_statement);
+      $row = $data->fetch_assoc();
+      while ($fieldinfo = $result->fetch_field()) {
+        $object->{$fieldinfo->name} = $row[$fieldinfo->name];
+      }
+    } else {
+      foreach ($data as $fieldname => $fieldvalue){
+        $object->{$fieldname} = $fieldvalue;
+      }
+
     }
   }
   
@@ -50,7 +55,58 @@ final class DataLayer {
     return $retval;
   }
 
-  public function GetObjectIds($classname, $filter=null, $sortby=null, $sortdirection=null){
+  // get the data for a given object ($classname)
+  // $classname: name of object
+  // filter: associative array: fieldname = fieldvalue (also supports wildcards - still WIP)
+  // sortby: field (should allow an associative field array for fields and direction)
+  // fields: list of fields to retrieve
+  public function GetObjectCollection($classname, $filter=null, $sortby=null, $sortdirection=null, $fields=null){
+    $retval = array();
+    if ($fields != null){
+      $field_list = implode(',', $fields);
+    } else {
+      $field_list = "*";
+    }
+    $sql_statement = "select $field_list from $classname";
+    if ($filter != null){
+      $sql_statement .= ' where';
+      // create an array of all the and'ed statements if there are multiple fields in the filter
+      $ands = array();
+      foreach ($filter as $fieldname => $fieldvalue){
+        // checking for the like clause
+        if (strpos($fieldvalue, '%')){
+          array_push($ands, " lower($fieldname) like lower('$fieldvalue')");
+        } else {
+          array_push($ands, " lower($fieldname) = lower('$fieldvalue')");
+        }
+      }
+      if (sizeof($ands) > 0){
+        $sql_statement .= implode(' and ', $ands);
+      }
+    }
+    if ($sortby !== null) {
+      $sql_statement .= " order by $sortby $sortdirection";
+    }
+
+    $sql_statement .= ';';
+
+    $result = $this->conn->query($sql_statement);
+    $table_fields =  $result->fetch_fields();
+    $collection = array();
+
+    while($row = $result->fetch_assoc()) {
+      $item = array();
+      foreach ($table_fields as $table_field){
+        $item[$table_field->name] = $row[$table_field->name];
+      }
+      array_push($collection, $item);
+    }
+    $result->free();
+    return $collection;
+  }
+
+
+  public function _GetObjectIds($classname, $filter=null, $sortby=null, $sortdirection=null){
     $retval = array();
     $sql_statement = "select id from $classname";
     if ($filter != null){
@@ -86,21 +142,50 @@ final class DataLayer {
       and c.id in (select c.id as cid from establishment e, category c, est_cat ec
                       where e.id = ec.estid and c.id = ec.catid and e.areaid = 3
                       and e.name like 'ABAN%'); */
-  public function GetRelatedEstablishmentObjectIDs($eids, $areaid){
+  public function GetRelatedEstablishmentObjectCollection($eids, $areaid){
     $retval = array();
     $eid_comma_list = implode(',', $eids);
-    $sql_statement = "select e.id from
+    $sql_statement = "select e.id, e.name, e.address, e.phone from
                         establishment e, category c, est_cat ec
                         where e.id = ec.estid and c.id = ec.catid and e.areaid = $areaid and e.id not in ($eid_comma_list)
                         and c.id in (select c.id as cid from establishment e, category c, est_cat ec
                                       where e.id = ec.estid and c.id = ec.catid and e.areaid = $areaid
                                       and e.id in ($eid_comma_list));";
+    file_put_contents(__FUNCTION__ . '.log', $sql_statement);
     $result = $this->conn->query($sql_statement);
+    $table_fields =  $result->fetch_fields();
+    $collection = array();
+
     while($row = $result->fetch_assoc()) {
-      array_push($retval, $row['id']);
+      $item = array();
+      foreach ($table_fields as $table_field){
+        $item[$table_field->name] = $row[$table_field->name];
+      }
+      array_push($collection, $item);
     }
-    return $retval;
-                                  
+    $result->free();
+    return $collection;                                  
+  }
+  
+  public function GetAllEstabsAndCatsByArea($areaid){
+    $retval = array();
+    $sql_statement = "select e.id as eid, e.name as ename, c.id as cid, c.name as cname
+                        from establishment e, category c, est_cat ec  where e.id = ec.estid
+                        and c.id = ec.catid and e.areaid = $areaid;";
+    file_put_contents('./logs/' . __FUNCTION__ . '.log', $sql_statement);                        
+    $result = $this->conn->query($sql_statement);
+    $table_fields =  $result->fetch_fields();
+    $collection = array();
+
+    while($row = $result->fetch_assoc()) {
+      $item = array();
+      foreach ($table_fields as $table_field){
+        $item[$table_field->name] = $row[$table_field->name];
+      }
+      array_push($collection, $item);
+    }
+    $result->free();
+    return $collection;                                  
   }
 
   public function Save($object){

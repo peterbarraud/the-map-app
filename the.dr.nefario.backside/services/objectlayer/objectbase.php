@@ -1,10 +1,10 @@
 <?php
 require_once ('datalayer.php');
 class objectbase {
-    public function __construct($id=null) {
-        $this->id = $id;
+    // null implies creating a new object
+    public function __construct($data=null) {
         $dataLayer = DataLayer::Instance();
-        $dataLayer->GetObjectData($this);
+        $dataLayer->GetObjectData($this, $data);
     }
     public function Save(){
         $dataLayer = DataLayer::Instance();

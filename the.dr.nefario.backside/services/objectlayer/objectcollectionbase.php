@@ -5,11 +5,12 @@ class objectcollectionbase {
         $this->items = array();
         $dataLayer = DataLayer::Instance();
         $classname = str_replace('collection', '', get_class($this));
-        $objectIds = $dataLayer->GetObjectIds($classname, $filter, $sortby, $sortdirection);
+        $datacollection = $dataLayer->GetObjectCollection($classname, $filter, $sortby, $sortdirection);
         require_once($classname . '.php');
-		$type = $classname;
-        foreach ($objectIds as $id){
-            array_push($this->items, new $type($id));
+        $this->items = array();
+        $type = $classname;
+        foreach ($datacollection as $item) {
+            array_push($this->items, new $type($item));
         }
         $this->length = sizeof($this->items);
     }
@@ -25,7 +26,6 @@ class objectcollectionbase {
         var_dump($this);
         return ob_get_clean(); 
     }
-    
 }
 
 ?>

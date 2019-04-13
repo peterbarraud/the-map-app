@@ -2,6 +2,7 @@
 the.dr.nefario.backside/services/*.log
 the-web-app/build/
 the.dr.nefario.backside/services/logs/
+the.dr.nefario.backside/services/test-data/~$sample-1.xlsx
 /the.dr.nefario.backside/mariadb.min/
 /the.dr.nefario.backside/php.min/
 /the.dr.nefario.backside/mdb.running

@@ -14,6 +14,109 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `area`
+--
+
+DROP TABLE IF EXISTS `area`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `area` (
+  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `areaname` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `areaname` (`areaname`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `area`
+--
+
+LOCK TABLES `area` WRITE;
+/*!40000 ALTER TABLE `area` DISABLE KEYS */;
+INSERT INTO `area` VALUES (3,'sector 123'),(6,'sector 128'),(5,'sector 129'),(1,'sector 132'),(2,'sector 148'),(4,'sector 178');
+/*!40000 ALTER TABLE `area` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `category`
+--
+
+DROP TABLE IF EXISTS `category`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `category` (
+  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `category`
+--
+
+LOCK TABLES `category` WRITE;
+/*!40000 ALTER TABLE `category` DISABLE KEYS */;
+/*!40000 ALTER TABLE `category` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `est_cat`
+--
+
+DROP TABLE IF EXISTS `est_cat`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `est_cat` (
+  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `catid` smallint(5) unsigned NOT NULL,
+  `estid` smallint(5) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `catid` (`catid`),
+  KEY `estid` (`estid`),
+  CONSTRAINT `est_cat_ibfk_1` FOREIGN KEY (`catid`) REFERENCES `category` (`id`),
+  CONSTRAINT `est_cat_ibfk_2` FOREIGN KEY (`estid`) REFERENCES `establishment` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `est_cat`
+--
+
+LOCK TABLES `est_cat` WRITE;
+/*!40000 ALTER TABLE `est_cat` DISABLE KEYS */;
+/*!40000 ALTER TABLE `est_cat` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `establishment`
+--
+
+DROP TABLE IF EXISTS `establishment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `establishment` (
+  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `address` varchar(50) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `areaid` smallint(5) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `establishment`
+--
+
+LOCK TABLES `establishment` WRITE;
+/*!40000 ALTER TABLE `establishment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `establishment` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -24,4 +127,4 @@
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-04-16  9:57:26
+-- Dump completed on 2019-04-16 14:43:34

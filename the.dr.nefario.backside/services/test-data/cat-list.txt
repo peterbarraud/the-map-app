@@ -1,15 +1,27 @@
-1,beauty palour
-2,bike repair
-3,book seller
-4,dhaba
-5,drug store
-6,grocer
-7,gym
+26,beauty palour
+20,book shop
+12,camping equipment
+10,chemist
+13,coaching classes
+6,department store
+9,drug store
+7,general store
+5,grocer
+16,guitar
+28,ice cream palour
+2,mobile repair
+1,mobile sale
+15,music
+22,namkeen
 8,pharmacy
-9,play school
-10,restaurant
-11,salon
-12,school
-13,toy store
-14,tyre puncture
-15,vegetable vendor
+4,phone recharge
+3,photostat
+24,resturant
+25,salon
+23,snacks
+11,sports
+19,stationer
+21,sweets
+17,toy shop
+18,toy store
+14,tutorials

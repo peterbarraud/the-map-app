@@ -4,10 +4,11 @@
 1. Move the following folders into the project folder from `Step 2`
 `mariadb.min`
 `php.min`
+1. Go to `the.dr.nefario.backside`
 1. Double-click `start.db.bat`
-1. Go to `db.bat`
+1. Go to `the.dr.nefario.backside/db.bat`
 1. Double-click `setup.db.bat`
-  If you need access to the db, double-click `login.user.bat`
+1. If you need access to the db, double-click `login.user.bat`
 1. Go to `<project folder>/the.dr.nefario.backside/`
 1. Double-click `start.php.bat`
 1. Go to `<project folder>/the-web-app`

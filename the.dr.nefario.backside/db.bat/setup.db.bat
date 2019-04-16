@@ -1,3 +1,3 @@
-..\mariadb.min\bin\mysql -u root -p < setupdb.sql
-..\mariadb.min\bin\mysql -u root -p -D themapapp < themapapp-structure.sql
+..\mariadb.min\bin\mysql -u root -p < sql\setupdb.sql
+..\mariadb.min\bin\mysql -u gapeterb1 -ppokerj07 -D themapapp < sql\themapapp.sql
 pause

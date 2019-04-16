@@ -50,6 +50,13 @@
     echo json_encode(array('results' => $resutls));
   }
 
+  function uploadestabdata(){
+    require_once('objectlayer/establishmentcollection.php');
+    establishmentcollection::UploadData();
+    echo json_encode(array('status' => 'done'));
+
+  }
+
 
 
  ?>

@@ -30,10 +30,10 @@ final class DataLayer {
   public function GetObjectData($object, $data){
     if ($data === null){
       $sql_statement = 'select * from ' . get_class($object) . ' where id = null';
+      file_put_contents('./logs/' . __FUNCTION__ . '.log', $sql_statement);
       $result = $this->conn->query($sql_statement);
-      $row = $data->fetch_assoc();
       while ($fieldinfo = $result->fetch_field()) {
-        $object->{$fieldinfo->name} = $row[$fieldinfo->name];
+        $object->{$fieldinfo->name} = null;
       }
     } else {
       foreach ($data as $fieldname => $fieldvalue){

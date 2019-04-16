@@ -77,6 +77,45 @@ class establishmentcollection extends objectcollectionbase {
         $estab_matches = preg_grep("/$search_q/i", array_keys($estabs));
         return $estabsandcats;
     }
+    public static function UploadData(){
+        file_put_contents('./logs/' . __FUNCTION__ . '.log', "");
+        require_once('categorycollection.php');
+        require_once('category.php');
+        require_once('establishment.php');
+        require_once('est_cat.php');
+        $file = file_get_contents("test-data/estab-data.csv");
+        $lines = explode("\n", $file);
+        foreach ($lines as $line){
+            $items = explode(",", $line);
+            $name = array_shift($items);
+            $establishment = new establishment();
+            $establishment->name = $name;
+            $establishment->phone = 999;
+            $establishment->address = 999;
+            $establishment->areaid = 1;
+            $establishment->Save();
+            foreach($items as $category){
+                $category_id = -1;
+                $category = trim($category);
+                $categories = new categorycollection(array("name" => "$category"));
+                if ($categories->length === 0){
+                    $new_category = new category();
+                    $new_category->name = $category;
+                    $new_category->Save();
+                    $category_id = $new_category->id;
+                    file_put_contents('./logs/' . __FUNCTION__ . '.log', $new_category->id . "\n", FILE_APPEND);
+                } else {
+                    $category_id = $categories->items[0]->id;
+                }
+                $est_cat = new est_cat();
+                $est_cat->catid = $category_id;
+                $est_cat->estid = $establishment->id;
+                file_put_contents('./logs/' . __FUNCTION__ . '.log', "$est_cat\n", FILE_APPEND);
+                $est_cat->Save();
+            }
+            file_put_contents('./logs/' . __FUNCTION__ . '.log', "$category_id\n", FILE_APPEND);
+    }
+    }
 }
 
 ?>

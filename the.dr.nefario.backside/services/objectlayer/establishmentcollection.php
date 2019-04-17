@@ -27,6 +27,9 @@ class establishmentcollection extends objectcollectionbase {
     private static function log_search_results($str){
         file_put_contents('./logs/GetSearchResults.log', $str . "\n", FILE_APPEND);
     }
+    private static function log_sep(){
+        file_put_contents('./logs/GetSearchResults.log', "=======\n", FILE_APPEND);
+    }
     public static function GetSearchResults($search_q, $areaid){
         file_put_contents('./logs/GetSearchResults.log', "");
         
@@ -55,32 +58,47 @@ class establishmentcollection extends objectcollectionbase {
         // 1. split the search_q into words
         self::log_search_results("Search query: " . $search_q);
         $words = preg_split ("/\s+/", $search_q);
-        $cat_matches = array();
-        $estab_matches = array();
+        $longest_eatab_match = '';
+        $longest_eatab_match_len = -1;
+        $longest_cat_match = '';
+        $longest_cat_match_len = -1;
         foreach (range(0, sizeof($words)-1) as $i){
             foreach(range(1, sizeof($words) - $i) as $j){
                 // self::log_search_results("$i, $j");
                 $slice = array_slice($words, $i, $j);
                 $sub_str = implode(' ', $slice);
                 self::log_search_results("search sub-str: " . $sub_str);
-                $cat_matches = preg_grep("/($sub_str)/i", array_keys($cats));
-                $estab_matches = preg_grep("/$sub_str/i", array_keys($estabs));
-                self::log_search_results("Results:");
+                if(preg_grep("/($sub_str)/i", array_keys($cats))){
+                    $longest_cat_match = $sub_str;
+                    $longest_cat_match_len = strlen($sub_str);
+
+                }
+                if(preg_grep("/($sub_str)/i", array_keys($estabs))){
+                    $longest_eatab_match = $sub_str;
+                    $longest_eatab_match_len = strlen($sub_str);
+
+                }
             }
         }
-        $cat_ids = array();
-        $estab_ids = array();
-        foreach($estab_matches as $estab){
-            array_push($estab_ids, $estabs[$estab]);
+        $estab_id = $estabs[$longest_eatab_match];
+        foreach ($estabs as $name => $id){
+            self::log_search_results("$name: $id");
         }
-        foreach($cat_matches as $cat){
-            array_push($cat_ids, $cats[$cat]);
+        self::log_sep();
+        $cat_id = $cats[$longest_cat_match];
+        $found_estabs = null;
+        $related_cats = null;
+        if (isset($estab_id)){
+            $found_estabs = $dataLayer->GetPriamryEstabObjectCollection($estab_id, $areaid);
         }
-        // $found_estabs = $dataLayer->GetEstabsObjectCollection($estab_ids, $areaid);
-        $related_cats = $dataLayer->GetRelatedCatsObjectCollection($cat_ids, $areaid);
+        if (isset($cat_id)){
+            $related_cats = $dataLayer->GetRelatedEstabsObjectCollection($cat_id, $areaid);
+        }
+        
+        
         self::log_search_results("=====");
         // 
-        return $related_cats;
+        return array('found_estabs' => $found_estabs, 'related_cats' => $related_cats);
     }
     public static function UploadData(){
         require_once('categorycollection.php');

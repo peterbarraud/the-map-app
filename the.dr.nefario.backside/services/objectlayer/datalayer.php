@@ -135,14 +135,35 @@ final class DataLayer {
     }
     return $retval;
   }
-
-  public function GetRelatedCatsObjectCollection($catids, $areaid){
+  public function GetPriamryEstabObjectCollection($estab_id, $areaid){
     $retval = array();
-    $cid_comma_list = implode(',', $catids);
+    $sql_statement = "select e.id as eid, e.name as ename, c.id as cid,
+                          c.name as cname from establishment e, category c,
+                          est_cat ec  where e.id = ec.estid and
+                          c.id = ec.catid and e.areaid = 1 and e.id = $estab_id;";
+    file_put_contents('./logs/' . __FUNCTION__ . '.log', $sql_statement);
+    $result = $this->conn->query($sql_statement);
+    $table_fields =  $result->fetch_fields();
+    $collection = array();
+
+    while($row = $result->fetch_assoc()) {
+      $item = array();
+      foreach ($table_fields as $table_field){
+        $item[$table_field->name] = $row[$table_field->name];
+      }
+      array_push($collection, $item);
+    }
+    $result->free();
+    return $collection;                                  
+  }
+
+
+  public function GetRelatedEstabsObjectCollection($cat_id, $areaid){
+    $retval = array();
     $sql_statement = "select e.id, e.name, e.address, e.phone, c.name from
                         establishment e, category c, est_cat ec
                         where e.id = ec.estid and c.id = ec.catid and e.areaid = $areaid
-                        and c.id in ($cid_comma_list);";
+                        and c.id = $cat_id;";
     $result = $this->conn->query($sql_statement);
     $table_fields =  $result->fetch_fields();
     $collection = array();

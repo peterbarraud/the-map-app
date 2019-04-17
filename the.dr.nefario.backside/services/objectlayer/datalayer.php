@@ -16,7 +16,7 @@ final class DataLayer {
     */
   private function __construct()
   {
-	$json_a = json_decode(file_get_contents("datainfo.json"), true);
+	  $json_a = json_decode(file_get_contents("datainfo.json"), true);
     $this->conn = new mysqli($json_a['server'],$json_a['username'],$json_a['password'],$json_a['database']);
   }
 
@@ -30,7 +30,6 @@ final class DataLayer {
   public function GetObjectData($object, $data){
     if ($data === null){
       $sql_statement = 'select * from ' . get_class($object) . ' where id = null';
-      file_put_contents('./logs/' . __FUNCTION__ . '.log', $sql_statement);
       $result = $this->conn->query($sql_statement);
       while ($fieldinfo = $result->fetch_field()) {
         $object->{$fieldinfo->name} = null;
@@ -43,7 +42,7 @@ final class DataLayer {
     }
   }
   
-  public function GetIdByFieldName($classname, $fieldname, $fieldvalue){
+  public function _GetIdByFieldName($classname, $fieldname, $fieldvalue){
     $retval = null;
     // escape single quotes in field value
     $fieldvalue = str_replace('\'', '\\\'', $fieldvalue);
@@ -136,13 +135,34 @@ final class DataLayer {
     }
     return $retval;
   }
+
+  public function GetRelatedCatsObjectCollection($catids, $areaid){
+    $retval = array();
+    $cid_comma_list = implode(',', $catids);
+    $sql_statement = "select e.id, e.name, e.address, e.phone, c.name from
+                        establishment e, category c, est_cat ec
+                        where e.id = ec.estid and c.id = ec.catid and e.areaid = $areaid
+                        and c.id in ($cid_comma_list);";
+    $result = $this->conn->query($sql_statement);
+    $table_fields =  $result->fetch_fields();
+    $collection = array();
+    while($row = $result->fetch_assoc()) {
+      $item = array();
+      foreach ($table_fields as $table_field){
+        $item[$table_field->name] = $row[$table_field->name];
+      }
+      array_push($collection, $item);
+    }
+    $result->free();
+    return $collection;                                  
+  }
   /* select e.id, e.name as ename, e.address, e.phone from
       establishment e, category c, est_cat ec
       where e.id = ec.estid and c.id = ec.catid and e.areaid = 3 and e.id != 1
       and c.id in (select c.id as cid from establishment e, category c, est_cat ec
                       where e.id = ec.estid and c.id = ec.catid and e.areaid = 3
                       and e.name like 'ABAN%'); */
-  public function GetRelatedEstablishmentObjectCollection($eids, $areaid){
+  public function __GetRelatedEstablishmentObjectCollection($eids, $areaid){
     $retval = array();
     $eid_comma_list = implode(',', $eids);
     $sql_statement = "select e.id, e.name, e.address, e.phone from
@@ -151,7 +171,6 @@ final class DataLayer {
                         and c.id in (select c.id as cid from establishment e, category c, est_cat ec
                                       where e.id = ec.estid and c.id = ec.catid and e.areaid = $areaid
                                       and e.id in ($eid_comma_list));";
-    file_put_contents(__FUNCTION__ . '.log', $sql_statement);
     $result = $this->conn->query($sql_statement);
     $table_fields =  $result->fetch_fields();
     $collection = array();
@@ -172,7 +191,6 @@ final class DataLayer {
     $sql_statement = "select e.id as eid, e.name as ename, c.id as cid, c.name as cname
                         from establishment e, category c, est_cat ec  where e.id = ec.estid
                         and c.id = ec.catid and e.areaid = $areaid;";
-    file_put_contents('./logs/' . __FUNCTION__ . '.log', $sql_statement);                        
     $result = $this->conn->query($sql_statement);
     $table_fields =  $result->fetch_fields();
     $collection = array();

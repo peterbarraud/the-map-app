@@ -9,6 +9,7 @@
     $establishments = new areacollection();
     echo json_encode($establishments);
   }
+  // obsolete
   function getestabsearchresult($name, $areaid) {
     require_once('objectlayer/establishmentcollection.php');
     $establishments = new establishmentcollection(array("name" => "$name", "areaid" => $areaid));

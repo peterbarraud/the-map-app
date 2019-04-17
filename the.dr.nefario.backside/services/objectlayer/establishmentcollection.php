@@ -55,30 +55,34 @@ class establishmentcollection extends objectcollectionbase {
         // 1. split the search_q into words
         self::log_search_results("Search query: " . $search_q);
         $words = preg_split ("/\s+/", $search_q);
-        // $top_of_words_array = ;
+        $cat_matches = array();
+        $estab_matches = array();
         foreach (range(0, sizeof($words)-1) as $i){
             foreach(range(1, sizeof($words) - $i) as $j){
                 // self::log_search_results("$i, $j");
                 $slice = array_slice($words, $i, $j);
                 $sub_str = implode(' ', $slice);
                 self::log_search_results("search sub-str: " . $sub_str);
-                $matches = preg_grep("/($sub_str)/i", array_keys($cats));
+                $cat_matches = preg_grep("/($sub_str)/i", array_keys($cats));
+                $estab_matches = preg_grep("/$sub_str/i", array_keys($estabs));
                 self::log_search_results("Results:");
-                foreach($matches as $match){
-                    self::log_search_results($match);
-                }
-                self::log_search_results("=====");
-                // self::log_search_results();
             }
-            // self::log_search_results("=============");
         }
-        
-
-        $estab_matches = preg_grep("/$search_q/i", array_keys($estabs));
-        return $estabsandcats;
+        $cat_ids = array();
+        $estab_ids = array();
+        foreach($estab_matches as $estab){
+            array_push($estab_ids, $estabs[$estab]);
+        }
+        foreach($cat_matches as $cat){
+            array_push($cat_ids, $cats[$cat]);
+        }
+        // $found_estabs = $dataLayer->GetEstabsObjectCollection($estab_ids, $areaid);
+        $related_cats = $dataLayer->GetRelatedCatsObjectCollection($cat_ids, $areaid);
+        self::log_search_results("=====");
+        // 
+        return $related_cats;
     }
     public static function UploadData(){
-        file_put_contents('./logs/' . __FUNCTION__ . '.log', "");
         require_once('categorycollection.php');
         require_once('category.php');
         require_once('establishment.php');
@@ -103,17 +107,14 @@ class establishmentcollection extends objectcollectionbase {
                     $new_category->name = $category;
                     $new_category->Save();
                     $category_id = $new_category->id;
-                    file_put_contents('./logs/' . __FUNCTION__ . '.log', $new_category->id . "\n", FILE_APPEND);
                 } else {
                     $category_id = $categories->items[0]->id;
                 }
                 $est_cat = new est_cat();
                 $est_cat->catid = $category_id;
                 $est_cat->estid = $establishment->id;
-                file_put_contents('./logs/' . __FUNCTION__ . '.log', "$est_cat\n", FILE_APPEND);
                 $est_cat->Save();
             }
-            file_put_contents('./logs/' . __FUNCTION__ . '.log', "$category_id\n", FILE_APPEND);
     }
     }
 }

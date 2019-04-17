@@ -24,9 +24,8 @@ DROP TABLE IF EXISTS `area`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `area` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `areaname` varchar(50) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `areaname` (`areaname`)
+  `name` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -36,7 +35,7 @@ CREATE TABLE `area` (
 
 LOCK TABLES `area` WRITE;
 /*!40000 ALTER TABLE `area` DISABLE KEYS */;
-INSERT INTO `area` VALUES (3,'sector 123'),(6,'sector 128'),(5,'sector 129'),(1,'sector 132'),(2,'sector 148'),(4,'sector 178');
+INSERT INTO `area` VALUES (1,'sector 132'),(2,'sector 148'),(3,'sector 123'),(4,'sector 178'),(5,'sector 129'),(6,'sector 128');
 /*!40000 ALTER TABLE `area` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -130,4 +129,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-04-16 22:27:22
+-- Dump completed on 2019-04-17  8:59:41

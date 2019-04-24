@@ -1,6 +1,7 @@
-<?php
+<?php  
 
 final class DataLayer {
+  private $sql_statement = '';
   public static function Instance()
   {
       static $inst = null;
@@ -42,57 +43,89 @@ final class DataLayer {
     }
   }
   
-  public function _GetIdByFieldName($classname, $fieldname, $fieldvalue){
-    $retval = null;
-    // escape single quotes in field value
-    $fieldvalue = str_replace('\'', '\\\'', $fieldvalue);
-    $sql_statement = "select id from $classname where $fieldname = '$fieldvalue'";
-    $result = $this->conn->query($sql_statement);
-    while($row = $result->fetch_assoc()) {
-      $retval = $row['id'];
-    }
-    return $retval;
-  }
 
-  // get the data for a given object ($classname)
-  // $classname: name of object
-  // filter: associative array: fieldname = fieldvalue (also supports wildcards - still WIP)
-  // sortby: field (should allow an associative field array for fields and direction)
-  // fields: list of fields to retrieve
-  public function GetObjectCollection($classname, $filter=null, $sortby=null, $sortdirection=null, $fields=null){
-    $retval = array();
-    if ($fields != null){
-      $field_list = implode(',', $fields);
+
+  private static function logit($str=null, $append=1, $not_new_line=null){
+    if ($append !== 1){
+      if ($not_new_line == null){
+        file_put_contents('./logs/getobjectcollection.log', $str . "\n");
+      } else {
+        file_put_contents('./logs/getobjectcollection.log', $str);
+      }
     } else {
-      $field_list = "*";
+      if ($not_new_line == null){
+        file_put_contents('./logs/getobjectcollection.log', $str . "\n", FILE_APPEND);
+      } else {
+        file_put_contents('./logs/getobjectcollection.log', $str, FILE_APPEND);
+      }
     }
-    $sql_statement = "select $field_list from $classname";
-    if ($filter != null){
-      $sql_statement .= ' where';
-      // create an array of all the and'ed statements if there are multiple fields in the filter
-      $ands = array();
-      foreach ($filter as $fieldname => $fieldvalue){
-        // checking for the like clause
-        if (strpos($fieldvalue, '%')){
-          array_push($ands, " lower($fieldname) like lower('$fieldvalue')");
-        } else {
-          array_push($ands, " lower($fieldname) = lower('$fieldvalue')");
+  }
+  // objectname: name of the data object class
+
+  // fields: Array of fields to return in the result ['id', 'name', ...]
+
+  // filter: Array (not associative) of fields and values. Eg: ['id=1', ' and name like '%oke%'].
+  // This makes handling of filter much easier. So the caller puts the details into the filter.
+  // It breaks a bit of the separation of responsibilty. For example, the client will need to know about the SQL `like` clause.
+  // Also the `and` and `or` are put into the filter. Again, this gives a lot more flexibility as to how to set filters
+  // Example:
+  // for a query like:
+    // select * from table where id > 1 and id < 10 and name like 'pok%' or name like 'joh%'
+    // filter = ['id > 1', 'and id < 10', "and name like 'pok%'", "or name like 'joh%'"]
+    // while you might argue that we've pass the (at least in part) responsibility of building the query to the client
+    // But note also that this inforation will, in some way, has come from the client.
+  // I, at least, think it's a good price to pay for simplicity. Let's see, we might still change this later
+
+  // sortby: Associative array of fields to order by and sort direction
+  // Example:
+    // ['id' => 'desc', 'name' => 'asc']
+  
+  // query: To add more flexibility and access to more elaborate database queries,
+  // we've included the ability to create your own query templates
+  // These are includes (as an Associative array) into the queries.collection.php
+  // easy query has a name (that is passed by the caller) and a set of (optional) templated field-values
+  
+  // query_data: An Associative array of templated field-values that will be used by the query (above)
+  // Example:
+    // select * from table where id in [ids] and name like %[name]%;
+    // note the templating square brackets
+    // query_data = ['ids' = [1, 2, 3], 'name' = 'ker']
+    // if the template value is an array, this is converted into a comma separated set of values.
+    // So, for the in clause, we pass an array of values
+  public function GetObjectCollection($objectname, $fields=null, $filter=null, $sortby=null, $query_name=null, $query_data=null){
+  if ($query_name !== null){
+      require_once('queries.collection.php');
+      $sql_statement = QueryList::$queries[$query_name];
+      if ($query_data !== null){
+        foreach ($query_data as $name => $value){
+          if (is_array($value)){
+            $sql_statement = str_replace("[$name]", implode(", ", $value), $sql_statement);
+          } else {  // not array
+            $sql_statement = str_replace("[$name]", $value, $sql_statement);
+          }
+
         }
       }
-      if (sizeof($ands) > 0){
-        $sql_statement .= implode(' and ', $ands);
+      $sql_statement = str_replace("[areaid]", 1, $sql_statement);
+      $sql_statement = str_replace("[estab_ids]", "1, 2", $sql_statement);
+      self::logit($sql_statement);
+      // $sql_statement = "select * from establishment;";
+    } else {  // query not given
+      if ($fields != null){
+        $field_list = implode(',', $fields);
+      } else { // fields is given
+        $field_list = "*";
+      }
+      $sql_statement = "select $field_list from $objectname;";
+      if ($filter != null){
+        $where_filter = implode(' ', $filter);
+        $sql_statement = "select $field_list from $objectname where $where_filter;";
       }
     }
-    if ($sortby !== null) {
-      $sql_statement .= " order by $sortby $sortdirection";
-    }
-
-    $sql_statement .= ';';
-
+    $collection = array();
+    self::logit($sql_statement);
     $result = $this->conn->query($sql_statement);
     $table_fields =  $result->fetch_fields();
-    $collection = array();
-
     while($row = $result->fetch_assoc()) {
       $item = array();
       foreach ($table_fields as $table_field){
@@ -103,44 +136,71 @@ final class DataLayer {
     $result->free();
     return $collection;
   }
+  
+  // public function _GetObjectCollection($objectnamem $filter=null, $sortby=null, $fields=null, $query=null, $query_data=null){
+  //   $retval = array();
+  //   if ($query !== NULL){
+
+  //   } else {
+  //     if ($fields != null){
+  //       $field_list = implode(',', $fields);
+  //     } else {
+  //       $field_list = "*";
+  //     }
+  //     $sql_statement = "select $field_list from $classname";
+  
+  //   }
+  //   if ($fields != null){
+  //     $field_list = implode(',', $fields);
+  //   } else {
+  //     $field_list = "*";
+  //   }
+  //   $sql_statement = "select $field_list from $classname";
+  //   if ($filter != null){
+  //     $sql_statement .= ' where';
+  //     // create an array of all the and'ed statements if there are multiple fields in the filter
+  //     $ands = array();
+  //     foreach ($filter as $fieldname => $fieldvalue){
+  //       // checking for the like clause
+  //       if (strpos($fieldvalue, '%')){
+  //         array_push($ands, " lower($fieldname) like lower('$fieldvalue')");
+  //       } else {
+  //         array_push($ands, " lower($fieldname) = lower('$fieldvalue')");
+  //       }
+  //     }
+  //     if (sizeof($ands) > 0){
+  //       $sql_statement .= implode(' and ', $ands);
+  //     }
+  //   }
+  //   if ($sortby !== null) {
+  //     $sql_statement .= " order by $sortby $sortdirection";
+  //   }
+
+  //   $sql_statement .= ';';
+
+  //   $result = $this->conn->query($sql_statement);
+  //   $table_fields =  $result->fetch_fields();
+  //   $collection = array();
+
+  //   while($row = $result->fetch_assoc()) {
+  //     $item = array();
+  //     foreach ($table_fields as $table_field){
+  //       $item[$table_field->name] = $row[$table_field->name];
+  //     }
+  //     array_push($collection, $item);
+  //   }
+  //   $result->free();
+  //   return $collection;
+  // }
 
 
-  public function _GetObjectIds($classname, $filter=null, $sortby=null, $sortdirection=null){
+  public function GetPriamryEstabObjectCollection($estab_ids, $areaid){
     $retval = array();
-    $sql_statement = "select id from $classname";
-    if ($filter != null){
-      $sql_statement .= ' where';
-      // create an array of all the and'ed statements if there are multiple fields in the filter
-      $ands = array();
-      foreach ($filter as $fieldname => $fieldvalue){
-        // checking for the like clause
-        if (strpos($fieldvalue, '%')){
-          array_push($ands, " lower($fieldname) like lower('$fieldvalue')");
-        } else {
-          array_push($ands, " lower($fieldname) = lower('$fieldvalue')");
-        }
-      }
-      if (sizeof($ands) > 0){
-        $sql_statement .= implode(' and ', $ands);
-      }
-    }
-
-    if ($sortby !== null) {
-      $sql_statement .= " order by $sortby $sortdirection";
-    }
-
-    $result = $this->conn->query($sql_statement);
-    while($row = $result->fetch_assoc()) {
-      array_push($retval, $row['id']);
-    }
-    return $retval;
-  }
-  public function GetPriamryEstabObjectCollection($estab_id, $areaid){
-    $retval = array();
+    $estab_ids_comma_list = implode(',', $estab_ids);
     $sql_statement = "select e.id as eid, e.name as ename, c.id as cid,
                           c.name as cname from establishment e, category c,
                           est_cat ec  where e.id = ec.estid and
-                          c.id = ec.catid and e.areaid = 1 and e.id = $estab_id;";
+                          c.id = ec.catid and e.areaid = $areaid and e.id in ($estab_ids_comma_list);";
     file_put_contents('./logs/' . __FUNCTION__ . '.log', $sql_statement);
     $result = $this->conn->query($sql_statement);
     $table_fields =  $result->fetch_fields();
@@ -177,12 +237,6 @@ final class DataLayer {
     $result->free();
     return $collection;                                  
   }
-  /* select e.id, e.name as ename, e.address, e.phone from
-      establishment e, category c, est_cat ec
-      where e.id = ec.estid and c.id = ec.catid and e.areaid = 3 and e.id != 1
-      and c.id in (select c.id as cid from establishment e, category c, est_cat ec
-                      where e.id = ec.estid and c.id = ec.catid and e.areaid = 3
-                      and e.name like 'ABAN%'); */
   public function __GetRelatedEstablishmentObjectCollection($eids, $areaid){
     $retval = array();
     $eid_comma_list = implode(',', $eids);

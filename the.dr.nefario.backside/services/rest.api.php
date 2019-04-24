@@ -9,22 +9,6 @@
     $establishments = new areacollection();
     echo json_encode($establishments);
   }
-  // obsolete
-  function getestabsearchresult($name, $areaid) {
-    require_once('objectlayer/establishmentcollection.php');
-    $establishments = new establishmentcollection(array("name" => "$name", "areaid" => $areaid));
-    // TODO
-    // Next line is presumptous. What if the search for name like returned multiple estabs
-    // need to hande passing mutiple eids => GetRelatedEstablishments
-    // $establishment = $establishments->items[0];
-    $eids = array();
-    foreach($establishments->items as $establishment){
-      array_push($eids, $establishment->id);
-    }
-    $relatedestablishments = establishmentcollection::GetRelatedEstablishments($eids, $areaid);
-    echo json_encode(array('establishments' => $establishments, 'relatedestablishments' => $relatedestablishments));
-  }
-
   // the search query is free-flowing text
   // we need to take out (possible) estab names and / or catgories from this query
   // the rule:
@@ -43,11 +27,19 @@
     }   
    */
 
-  function searchresult($search_q, $areaid) {
+  function findestabs($search_q, $areaid) {
     // let's get the list of estab names
     // Note: This could later be client-end functionality
     require_once('objectlayer/establishmentcollection.php');
-    $resutls = establishmentcollection::GetSearchResults($search_q, $areaid);
+    $establishmentcollection = new establishmentcollection();
+    $resutls = $establishmentcollection->FindEstabs($search_q, $areaid);
+    echo json_encode(array('results' => $resutls));
+  }
+
+  function getdatafortest(){
+    require_once('objectlayer/categorycollection.php');
+    $categorycollection = new categorycollection();
+    $resutls = $categorycollection->GetObjectCollection(['id', 'name'], ["name='stationer'"]);;
     echo json_encode(array('results' => $resutls));
   }
 
@@ -57,7 +49,5 @@
     echo json_encode(array('status' => 'done'));
 
   }
-
-
 
  ?>
